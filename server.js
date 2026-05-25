@@ -1,9 +1,12 @@
 // import express for establish localhost
 const express = require('express');
 const app = express();
+require('dotenv').config();
 
 // import db file which is a connection file between node js and DB
 const db =  require('./db');
+const PORT = process.env.PORT || 3000;  // env file se port no lega agar nhi milla to 3000 ko use krr lega
+
 
 // body-Parser for convert JSON formate data or so on into javascript object
 const bodyParser = require('body-parser');
@@ -30,7 +33,8 @@ app.use('/person', personRoutes); // personRoutes me se sbhi api me se person ko
 const MenuRoutes = require('./routes/menuRoutes');
 app.use('/',MenuRoutes);
 
+
 // app is listining on port no. 30000
-app.listen(3000, () =>{
+app.listen(PORT, () =>{
     console.log("listining on port 3000")
 })
