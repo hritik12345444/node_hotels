@@ -9,7 +9,7 @@ const Person = require('./../models/person');
 // example router.post('/', async(req,res) =>{})    // menuRoutes wala file me iss thr se nhi kiye hai wo dusra trika wlaa hai usme
 router.post('/', async(req,res) =>{
     try{
-        const data = req.body; // assuming teh request body contains the person data
+        const data = req.body; // assuming the request body contains the person data
 
         // create a new person document using the Mongoose model method 1
         const newPerson = new Person(data);
@@ -55,7 +55,7 @@ router.get('/:workType', async(req,res) =>{
         // fetche the what the api variable calls  as workType
         const workType = req.params.workType;
         // checks for if user send unnecessary word, if their words on present in person model than do something otherwise not need to call database for get data 
-        if(workType == 'chef' || workType == 'guiest' || workType == 'manager'){
+        if(workType == 'chef' || workType == 'guiest' || workType == 'manager' || workType == 'waiter' ){
             const response = await Person.find({work : workType}); // select only work == workType
             console.log('response fethced');
             res.status(200).json(response);
