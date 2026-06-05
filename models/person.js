@@ -36,29 +36,35 @@ const personSchema = new mongoose.Schema({
     }
 });
 
-personSchema.pre('save', async function(next){
-    const person = this;  // accesss the person scema
+personSchema.pre('save', async function () {
 
-    // agar password modified krna hai to ye true return krega agar password modifi (hashed) nahi krna hai to false return krega
-    if(!person.isModified('password')){
-        return next();
+    const person = this; // Current person document
+
+    // If password is not modified, skip hashing
+    // Example: user updates age or name only
+    if (!person.isModified('password')) {
+        return;
     }
 
-    try{
-        // salt generation
-        const salt = await bcrypt.genSalt(10);  // 10 ye jaga rhne se pass uthan secure hoga lekin hasing algorithm per time lgegaa jaada hone se
-        
-        // hash password
+    try {
+        // Generate a salt (10 rounds)
+        // Higher value = more secure but slower
+        const salt = await bcrypt.genSalt(10);
+
+        // Hash the plain text password
         const hashedPassword = await bcrypt.hash(person.password, salt);
-        // override the plain password with the hashed pass
+
+        // Replace plain password with hashed password
         person.password = hashedPassword;
 
-        next();  // called for store the hashed pass in DB , called after hashed pass is generated 
-    }catch(err){
-        console.log(err);
-        return next;
+    } catch (err) {
+        console.error('Error while hashing password:', err);
+
+        // Throw error so save operation fails
+        throw err;
     }
-})
+});
+
 
 personSchema.methods.comparePassword = async function(candidatePassword){
     try{

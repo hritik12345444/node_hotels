@@ -38,7 +38,7 @@ const MenuItem = require('./models/MenuItem');
 // Import the router files of person 
 const personRoutes = require('./routes/personRoutes');
 // use the routers
-app.use('/person',localAuthMiddleware, personRoutes); // personRoutes me se sbhi api me se person ko hta diye hai isseliye yeha /person bnaye hai 
+app.use('/person', personRoutes); // personRoutes me se sbhi api me se person ko hta diye hai isseliye yeha /person bnaye hai 
 // Import the router file of menuItems
 const MenuRoutes = require('./routes/menuRoutes');
 app.use('/', MenuRoutes);

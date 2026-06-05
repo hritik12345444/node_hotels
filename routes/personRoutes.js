@@ -3,11 +3,13 @@
 const express = require('express');    // for server bnaan , routes bnaana, requests handles krna
 const router = express.Router();
 const Person = require('./../models/person');
+const {jwtAuthMiddleware, generateToken} = require('../jwt');
+const { json } = require('body-parser');
 
 
 // sare method me jbb /person hi hai to hmm sbhi jagah likhne se aacha hai ki server file me jha isse import kiye hai wha pe hi /person krr de aur iss file me person ko htta de only / hi rakhe
 // example router.post('/', async(req,res) =>{})    // menuRoutes wala file me iss thr se nhi kiye hai wo dusra trika wlaa hai usme
-router.post('/', async(req,res) =>{
+router.post('/signup', async(req,res) =>{
     try{
         const data = req.body; // assuming the request body contains the person data
 
@@ -27,7 +29,18 @@ router.post('/', async(req,res) =>{
 
         const response = await newPerson.save();
         console.log('data saved');
-        res.status(200).json(response);
+
+        const payload = {
+            id : response.id,
+            username : response.username
+        }
+
+        // generate token
+        const token = await generateToken(payload);
+        console.log("Token is : ", token);
+        console.log(JSON.stringify(payload))
+        
+        res.status(200).json({response : response, token : token});
     }
     catch(err){
         console.log(err);
@@ -36,8 +49,54 @@ router.post('/', async(req,res) =>{
 
 })
 
+// Login Route
+router.post('/login', async(req, res) => {
+    try{
+        // Extract username and password form request body
+        const {username, password} = req.body;
 
-router.get('/', async(req,res) =>{
+        // Find the user by username
+        const user = await Person.findOne({username : username});
+
+        // If user does not exist or password does not match, return error
+        if(!user || !(await user.comparePassword(password))){
+            return res.status(401).json({error : "Invalid username or password"});
+        }
+
+        // Generate Token
+        const payload = {
+            id : user.id,
+            username : user.username
+        }
+        const token = generateToken(payload);
+
+        // return token as response
+        res.json({token})
+
+    }catch(err){
+        console.log(err);
+        res.status(500).json({error : "Internal server Error"});
+    }
+})
+
+// Profile route
+router.get('/profile',jwtAuthMiddleware, async(req,res) => {
+    try{
+        const userData = req.user;
+        console.log("User Data : ", userData);
+
+        const userId = userData.id;
+        const user = await Person.findById(userId);
+
+        res.status(200).json({user});
+    }catch(err){
+        console.log(err);
+        res.status(401).json({errro : "Internal server error"});
+    }
+})
+
+
+router.get('/',jwtAuthMiddleware, async(req,res) =>{
     try{
         const data = await Person.find();
         console.log('Data fatched');
@@ -50,7 +109,7 @@ router.get('/', async(req,res) =>{
 
 
 // Parametrized api calls
-router.get('/:workType', async(req,res) =>{
+router.get('/:workType', jwtAuthMiddleware, async(req,res) =>{
     try{
         // fetche the what the api variable calls  as workType
         const workType = req.params.workType;
