@@ -4,7 +4,6 @@ const express = require('express');    // for server bnaan , routes bnaana, requ
 const router = express.Router();
 const Person = require('./../models/person');
 const {jwtAuthMiddleware, generateToken} = require('../jwt');
-const { json } = require('body-parser');
 
 
 // sare method me jbb /person hi hai to hmm sbhi jagah likhne se aacha hai ki server file me jha isse import kiye hai wha pe hi /person krr de aur iss file me person ko htta de only / hi rakhe
